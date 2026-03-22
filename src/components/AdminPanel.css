@@ -1,0 +1,124 @@
+.admin-panel {
+  padding: 3rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.admin-panel h2 {
+  margin-bottom: 2rem;
+}
+
+.btn-primary {
+  background: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 2rem;
+}
+
+.product-form {
+  background: #f9f9f9;
+  padding: 2rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.product-form input, .product-form textarea, .product-form select {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+.product-form textarea {
+  min-height: 100px;
+}
+
+.btn-success {
+  background: #28a745;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.products-list h3 {
+  margin: 2rem 0 1rem;
+  font-size: 1.5rem;
+}
+
+.product-item {
+  display: flex;
+  gap: 1rem;
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.product-item img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.product-info {
+  flex: 1;
+}
+
+.product-info h4 {
+  margin: 0 0 0.5rem;
+}
+
+.in-stock {
+  background: #28a745;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  margin-right: 5px;
+}
+
+.out-stock {
+  background: #dc3545;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  margin-right: 5px;
+}
+
+.new-badge {
+  background: #ffc107;
+  color: black;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 0.8rem;
+}
+
+.product-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.product-actions button {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  background: #6c757d;
+  color: white;
+}
+
+.btn-delete {
+  background: #dc3545 !important;
+}
