@@ -15,14 +15,23 @@ function Collections() {
 
   const settings = {
     dots: true,
-    arrows: true,
+    arrows: false,
     infinite: true,
-    speed: 500,
-    slidesToShow: 3,
+    speed: 600,
+    slidesToShow: 1,
     slidesToScroll: 1,
+    mobileFirst: true,
+    autoplay: true,
+    autoplaySpeed: 3000,
+    pauseOnHover: true,
+    pauseOnFocus: true,
+    pauseOnDotsHover: true,
+    swipe: true,
+    draggable: true,
+    touchMove: true,
     responsive: [
-      { breakpoint: 1024, settings: { slidesToShow: 2 } },
-      { breakpoint: 768, settings: { slidesToShow: 1, arrows: false } }
+      { breakpoint: 768, settings: { slidesToShow: 2, arrows: true } },
+      { breakpoint: 1024, settings: { slidesToShow: 3, arrows: true } }
     ]
   };
 
