@@ -44,6 +44,12 @@
   font-weight: 600;
 }
 
+.sync-hint {
+  margin: 0 0 0.45rem;
+  font-size: 0.88rem;
+  color: #555;
+}
+
 .product-form {
   background: #f9f9f9;
   padding: 2rem;
@@ -74,6 +80,13 @@
   margin: -0.5rem 0 0.25rem;
   font-size: 0.9rem;
   color: #666;
+}
+
+.edit-hint {
+  margin: -0.45rem 0 0.1rem;
+  font-size: 0.88rem;
+  color: #8b6427;
+  font-weight: 600;
 }
 
 .form-status {

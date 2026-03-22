@@ -24,6 +24,7 @@ function AdminPanel() {
   const [imageStatus, setImageStatus] = useState('');
   const [dataSyncStatus, setDataSyncStatus] = useState('');
   const importFileInputRef = useRef(null);
+  const formRef = useRef(null);
 
   const normalizeExternalLink = (link) => {
     const trimmed = String(link || '').trim();
@@ -306,8 +307,10 @@ function AdminPanel() {
       newProducts[category] = newProducts[category].map((item, index) =>
         (index === editIndex ? payload : item)
       );
+      setDataSyncStatus('Product updated on this device. Export Products to share on another device.');
     } else {
       newProducts[category] = [payload, ...newProducts[category]];
+      setDataSyncStatus('Product added on this device. Export Products to share on another device.');
     }
     saveProducts(newProducts);
     resetForm();
@@ -323,6 +326,9 @@ function AdminPanel() {
       facebookLink: product.facebookLink || ''
     });
     setShowForm(true);
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 0);
   };
 
   const handleDelete = (cat, index) => {
@@ -330,6 +336,7 @@ function AdminPanel() {
       const newProducts = { ...products };
       newProducts[cat] = newProducts[cat].filter((_, i) => i !== index);
       saveProducts(newProducts);
+      setDataSyncStatus('Product deleted on this device. Export Products to sync this change elsewhere.');
     }
   };
 
@@ -339,6 +346,7 @@ function AdminPanel() {
       (i === index ? { ...item, inStock: !item.inStock } : item)
     );
     saveProducts(newProducts);
+    setDataSyncStatus('Stock status updated on this device. Export Products to sync this change elsewhere.');
   };
 
   const resetForm = () => {
@@ -371,14 +379,16 @@ function AdminPanel() {
           style={{ display: 'none' }}
         />
       </div>
+      <p className="sync-hint">Data is stored per browser/device. Use Export and Import to sync products between devices.</p>
       {dataSyncStatus && <p className="sync-status">{dataSyncStatus}</p>}
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="product-form">
-          <select value={category} onChange={(e) => setCategory(e.target.value)}>
+        <form ref={formRef} onSubmit={handleSubmit} className="product-form">
+          <select value={category} onChange={(e) => setCategory(e.target.value)} disabled={editIndex !== null}>
             <option value="mens">Men's</option>
             <option value="ladies">Ladies</option>
           </select>
+          {editIndex !== null && <p className="edit-hint">Editing mode: category is locked for this product.</p>}
           <input placeholder="Title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} required />
           <textarea placeholder="Description" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} required />
           <input placeholder="Price" value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} required />
