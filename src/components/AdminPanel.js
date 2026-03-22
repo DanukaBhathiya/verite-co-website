@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './AdminPanel.css';
 import { mensProducts, ladiesProducts } from '../data/products';
+import { supabase, hasSupabaseConfig } from '../lib/supabaseClient';
 
 const EMPTY_FORM = {
   title: '',
@@ -19,12 +20,17 @@ function AdminPanel() {
   const [showForm, setShowForm] = useState(false);
   const [category, setCategory] = useState('mens');
   const [editIndex, setEditIndex] = useState(null);
+  const [editProductId, setEditProductId] = useState(null);
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [isCompressingImage, setIsCompressingImage] = useState(false);
   const [imageStatus, setImageStatus] = useState('');
   const [dataSyncStatus, setDataSyncStatus] = useState('');
+  const [pendingImageUpload, setPendingImageUpload] = useState(null);
   const importFileInputRef = useRef(null);
   const formRef = useRef(null);
+
+  const LOCAL_STORAGE_KEY = 'veriteProducts';
+  const cloudMode = hasSupabaseConfig;
 
   const normalizeExternalLink = (link) => {
     const trimmed = String(link || '').trim();
@@ -36,6 +42,8 @@ function AdminPanel() {
   const sanitizeProduct = (product = {}) => ({
     ...EMPTY_FORM,
     ...product,
+    id: product.id || null,
+    createdAt: product.createdAt || null,
     title: String(product.title || '').trim(),
     description: String(product.description || '').trim(),
     price: String(product.price || '').trim(),
@@ -52,46 +60,143 @@ function AdminPanel() {
     ladies: Array.isArray(value?.ladies) ? value.ladies.map(sanitizeProduct) : []
   });
 
-  useEffect(() => {
-    const saved = localStorage.getItem('veriteProducts');
-    if (!saved) return;
+  const rowToProduct = (row) => sanitizeProduct({
+    id: row.id,
+    createdAt: row.created_at || null,
+    title: row.title,
+    description: row.description,
+    price: row.price,
+    sizes: row.sizes,
+    img: row.img,
+    facebookLink: row.facebook_link,
+    inStock: row.in_stock,
+    isNew: row.is_new,
+    active: row.active
+  });
 
-    try {
-      const parsed = JSON.parse(saved);
-      const normalizeLegacy = (items) => (Array.isArray(items) ? items.map((item) => ({
-        ...EMPTY_FORM,
-        ...item,
-        title: String(item.title || '').trim(),
-        description: String(item.description || '').trim(),
-        price: String(item.price || '').trim(),
-        sizes: String(item.sizes || '').trim(),
-        img: String(item.img || '').trim(),
-        facebookLink: (() => {
-          const trimmed = String(item.facebookLink || '').trim();
-          if (!trimmed) return '';
-          return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
-        })(),
-        inStock: item.inStock === undefined ? true : Boolean(item.inStock),
-        isNew: Boolean(item.isNew),
-        active: item.active === undefined ? true : Boolean(item.active)
-      })) : []);
+  const productToRow = (product, cat) => ({
+    category: cat,
+    title: String(product.title || '').trim(),
+    description: String(product.description || '').trim(),
+    price: String(product.price || '').trim(),
+    sizes: String(product.sizes || '').trim(),
+    img: String(product.img || '').trim(),
+    facebook_link: normalizeExternalLink(product.facebookLink || ''),
+    in_stock: Boolean(product.inStock),
+    is_new: Boolean(product.isNew),
+    active: product.active === undefined ? true : Boolean(product.active)
+  });
 
-      const normalized = {
-        mens: normalizeLegacy(parsed?.mens),
-        ladies: normalizeLegacy(parsed?.ladies)
-      };
-      setProducts({
-        mens: normalized.mens.length ? normalized.mens : mensProducts,
-        ladies: normalized.ladies.length ? normalized.ladies : ladiesProducts
-      });
-    } catch (err) {
-      console.error('Failed to parse saved products:', err);
-    }
-  }, []);
-
-  const saveProducts = (newProducts) => {
+  const saveProductsLocal = (newProducts) => {
     setProducts(newProducts);
-    localStorage.setItem('veriteProducts', JSON.stringify(newProducts));
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newProducts));
+  };
+
+  const refreshProductsFromCloud = async () => {
+    if (!cloudMode || !supabase) return;
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    const normalized = normalizeProductSet({
+      mens: (data || []).filter((row) => row.category === 'mens').map(rowToProduct),
+      ladies: (data || []).filter((row) => row.category === 'ladies').map(rowToProduct)
+    });
+    setProducts(normalized);
+  };
+
+  /* eslint-disable react-hooks/exhaustive-deps */
+  useEffect(() => {
+    let mounted = true;
+
+    const load = async () => {
+      if (cloudMode) {
+        try {
+          const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          if (error) throw error;
+          if (!mounted) return;
+
+          const normalized = normalizeProductSet({
+            mens: (data || []).filter((row) => row.category === 'mens').map(rowToProduct),
+            ladies: (data || []).filter((row) => row.category === 'ladies').map(rowToProduct)
+          });
+          setProducts(normalized);
+          if (mounted) {
+            setDataSyncStatus('Cloud sync enabled (Supabase).');
+          }
+        } catch (err) {
+          console.error('Cloud load failed, falling back to local:', err);
+          if (mounted) {
+            const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (saved) {
+              try {
+                const parsed = JSON.parse(saved);
+                setProducts(normalizeProductSet(parsed));
+              } catch (parseErr) {
+                console.error('Failed to parse local products:', parseErr);
+                setProducts(normalizeProductSet({ mens: mensProducts, ladies: ladiesProducts }));
+              }
+            } else {
+              setProducts(normalizeProductSet({ mens: mensProducts, ladies: ladiesProducts }));
+            }
+            setDataSyncStatus('Cloud connection failed. Using local device storage.');
+          }
+        }
+        return;
+      }
+
+      if (mounted) {
+        const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            setProducts(normalizeProductSet(parsed));
+          } catch (parseErr) {
+            console.error('Failed to parse local products:', parseErr);
+            setProducts(normalizeProductSet({ mens: mensProducts, ladies: ladiesProducts }));
+          }
+        } else {
+          setProducts(normalizeProductSet({ mens: mensProducts, ladies: ladiesProducts }));
+        }
+        setDataSyncStatus('Local mode: data is stored per device/browser.');
+      }
+    };
+
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+  /* eslint-enable react-hooks/exhaustive-deps */
+
+  const uploadImageToCloud = async (blob, originalName = 'product.jpg') => {
+    if (!cloudMode || !supabase) throw new Error('Cloud upload is not configured.');
+
+    const extension = (originalName.split('.').pop() || 'jpg')
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '');
+    const filePath = `products/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${extension || 'jpg'}`;
+
+    const { error: uploadError } = await supabase
+      .storage
+      .from('product-images')
+      .upload(filePath, blob, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: blob.type || 'image/jpeg'
+      });
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage.from('product-images').getPublicUrl(filePath);
+    return data.publicUrl;
   };
 
   const handleExportProducts = () => {
@@ -114,6 +219,27 @@ function AdminPanel() {
     }
   };
 
+  const replaceCloudProducts = async (productSet) => {
+    if (!cloudMode || !supabase) throw new Error('Cloud mode is not configured.');
+
+    const { error: deleteError } = await supabase
+      .from('products')
+      .delete()
+      .not('id', 'is', null);
+
+    if (deleteError) throw deleteError;
+
+    const rows = [
+      ...(productSet.mens || []).map((p) => productToRow(p, 'mens')),
+      ...(productSet.ladies || []).map((p) => productToRow(p, 'ladies'))
+    ];
+
+    if (rows.length) {
+      const { error: insertError } = await supabase.from('products').insert(rows);
+      if (insertError) throw insertError;
+    }
+  };
+
   const handleImportProducts = async (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
@@ -131,12 +257,18 @@ function AdminPanel() {
       const shouldImport = window.confirm('Import will replace current product list. Continue?');
       if (!shouldImport) return;
 
-      saveProducts(imported);
-      setDataSyncStatus(`Imported ${imported.mens.length + imported.ladies.length} products successfully.`);
+      if (cloudMode) {
+        await replaceCloudProducts(imported);
+        await refreshProductsFromCloud();
+        setDataSyncStatus(`Imported ${imported.mens.length + imported.ladies.length} products to cloud.`);
+      } else {
+        saveProductsLocal(imported);
+        setDataSyncStatus(`Imported ${imported.mens.length + imported.ladies.length} products locally.`);
+      }
       resetForm();
     } catch (err) {
       console.error('Import failed:', err);
-      alert('Invalid JSON file. Please select a valid product export.');
+      alert('Invalid JSON file or import failed.');
     } finally {
       e.target.value = '';
     }
@@ -237,6 +369,7 @@ function AdminPanel() {
 
     const compressedDataUrl = await fileToDataUrl(blob);
     return {
+      blob,
       dataUrl: compressedDataUrl,
       originalBytes: file.size,
       compressedBytes: blob.size
@@ -265,21 +398,23 @@ function AdminPanel() {
 
     try {
       const compressed = await compressImageFile(file);
+      setPendingImageUpload({ blob: compressed.blob, fileName: file.name });
       setFormData((prev) => ({ ...prev, img: compressed.dataUrl }));
       setImageStatus(
         `Image optimized: ${formatBytes(compressed.originalBytes)} -> ${formatBytes(compressed.compressedBytes)}`
       );
     } catch (err) {
-      console.error('Failed to read image file:', err);
+      console.error('Failed to process image file:', err);
       alert('Failed to process image. Please try another file.');
       setImageStatus('');
+      setPendingImageUpload(null);
     } finally {
       setIsCompressingImage(false);
       e.target.value = '';
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (isCompressingImage) {
       alert('Please wait until image optimization is complete.');
@@ -292,34 +427,64 @@ function AdminPanel() {
       return;
     }
 
-    const payload = {
-      ...formData,
-      title: formData.title.trim(),
-      description: formData.description.trim(),
-      price: formData.price.trim(),
-      sizes: formData.sizes.trim(),
-      img: cleanImage,
-      facebookLink: normalizeExternalLink(formData.facebookLink || '')
-    };
+    try {
+      let finalImage = cleanImage;
+      if (cloudMode && pendingImageUpload) {
+        setImageStatus('Uploading image to cloud...');
+        finalImage = await uploadImageToCloud(pendingImageUpload.blob, pendingImageUpload.fileName);
+      }
 
-    const newProducts = { ...products };
-    if (editIndex !== null) {
-      newProducts[category] = newProducts[category].map((item, index) =>
-        (index === editIndex ? payload : item)
-      );
-      setDataSyncStatus('Product updated on this device. Export Products to share on another device.');
-    } else {
-      newProducts[category] = [payload, ...newProducts[category]];
-      setDataSyncStatus('Product added on this device. Export Products to share on another device.');
+      const payload = sanitizeProduct({
+        ...formData,
+        img: finalImage
+      });
+
+      if (cloudMode) {
+        if (!supabase) throw new Error('Supabase client missing.');
+
+        if (editProductId) {
+          const { error } = await supabase
+            .from('products')
+            .update(productToRow(payload, category))
+            .eq('id', editProductId);
+          if (error) throw error;
+          setDataSyncStatus('Product updated in cloud.');
+        } else {
+          const { error } = await supabase
+            .from('products')
+            .insert([productToRow(payload, category)]);
+          if (error) throw error;
+          setDataSyncStatus('Product added to cloud.');
+        }
+        await refreshProductsFromCloud();
+      } else {
+        const newProducts = { ...products };
+        if (editIndex !== null) {
+          newProducts[category] = newProducts[category].map((item, index) =>
+            (index === editIndex ? payload : item)
+          );
+          setDataSyncStatus('Product updated locally.');
+        } else {
+          newProducts[category] = [payload, ...newProducts[category]];
+          setDataSyncStatus('Product added locally.');
+        }
+        saveProductsLocal(newProducts);
+      }
+
+      resetForm();
+    } catch (err) {
+      console.error('Save failed:', err);
+      alert(`Save failed: ${err.message || 'Unknown error'}`);
+      if (cloudMode) setImageStatus('');
     }
-    saveProducts(newProducts);
-    resetForm();
   };
 
   const handleEdit = (cat, index) => {
     setCategory(cat);
     setEditIndex(index);
     const product = products[cat][index];
+    setEditProductId(product.id || null);
+    setPendingImageUpload(null);
     setFormData({
       ...EMPTY_FORM,
       ...product,
@@ -331,31 +496,64 @@ function AdminPanel() {
     }, 0);
   };
 
-  const handleDelete = (cat, index) => {
-    if (window.confirm('Delete this product?')) {
-      const newProducts = { ...products };
-      newProducts[cat] = newProducts[cat].filter((_, i) => i !== index);
-      saveProducts(newProducts);
-      setDataSyncStatus('Product deleted on this device. Export Products to sync this change elsewhere.');
+  const handleDelete = async (cat, index) => {
+    if (!window.confirm('Delete this product?')) return;
+
+    try {
+      if (cloudMode) {
+        const product = products[cat][index];
+        if (!product?.id) throw new Error('Cloud product id missing.');
+        const { error } = await supabase.from('products').delete().eq('id', product.id);
+        if (error) throw error;
+        await refreshProductsFromCloud();
+        setDataSyncStatus('Product deleted from cloud.');
+      } else {
+        const newProducts = { ...products };
+        newProducts[cat] = newProducts[cat].filter((_, i) => i !== index);
+        saveProductsLocal(newProducts);
+        setDataSyncStatus('Product deleted locally.');
+      }
+    } catch (err) {
+      console.error('Delete failed:', err);
+      alert(`Delete failed: ${err.message || 'Unknown error'}`);
     }
   };
 
-  const toggleStock = (cat, index) => {
-    const newProducts = { ...products };
-    newProducts[cat] = newProducts[cat].map((item, i) =>
-      (i === index ? { ...item, inStock: !item.inStock } : item)
-    );
-    saveProducts(newProducts);
-    setDataSyncStatus('Stock status updated on this device. Export Products to sync this change elsewhere.');
+  const toggleStock = async (cat, index) => {
+    try {
+      if (cloudMode) {
+        const product = products[cat][index];
+        if (!product?.id) throw new Error('Cloud product id missing.');
+        const { error } = await supabase
+          .from('products')
+          .update({ in_stock: !product.inStock })
+          .eq('id', product.id);
+        if (error) throw error;
+        await refreshProductsFromCloud();
+        setDataSyncStatus('Stock status updated in cloud.');
+      } else {
+        const newProducts = { ...products };
+        newProducts[cat] = newProducts[cat].map((item, i) =>
+          (i === index ? { ...item, inStock: !item.inStock } : item)
+        );
+        saveProductsLocal(newProducts);
+        setDataSyncStatus('Stock status updated locally.');
+      }
+    } catch (err) {
+      console.error('Stock update failed:', err);
+      alert(`Stock update failed: ${err.message || 'Unknown error'}`);
+    }
   };
 
   const resetForm = () => {
     setFormData(EMPTY_FORM);
     setImageStatus('');
+    setPendingImageUpload(null);
     setIsCompressingImage(false);
     setShowForm(false);
     setCategory('mens');
     setEditIndex(null);
+    setEditProductId(null);
   };
 
   return (
@@ -379,7 +577,11 @@ function AdminPanel() {
           style={{ display: 'none' }}
         />
       </div>
-      <p className="sync-hint">Data is stored per browser/device. Use Export and Import to sync products between devices.</p>
+      <p className="sync-hint">
+        {cloudMode
+          ? 'Cloud mode (Supabase) is enabled. Changes are shared across devices.'
+          : 'Local mode: data is stored per device/browser. Use Export and Import to sync.'}
+      </p>
       {dataSyncStatus && <p className="sync-status">{dataSyncStatus}</p>}
 
       {showForm && (
@@ -402,14 +604,33 @@ function AdminPanel() {
           <input type="file" accept="image/*" onChange={handleImageUpload} />
           {imageStatus && <p className="form-status">{imageStatus}</p>}
           <p className="form-hint">Or enter image path/URL manually (example: /images/product.jpg)</p>
-          <input placeholder="Image path or URL" value={formData.img} onChange={(e) => setFormData({ ...formData, img: e.target.value })} />
+          <input
+            placeholder="Image path or URL"
+            value={formData.img}
+            onChange={(e) => {
+              setPendingImageUpload(null);
+              setFormData({ ...formData, img: e.target.value });
+            }}
+          />
           {formData.img && (
             <div className="image-preview">
               <img src={formData.img} alt="Product preview" />
-              <button type="button" onClick={() => setFormData({ ...formData, img: '' })}>Remove Image</button>
+              <button
+                type="button"
+                onClick={() => {
+                  setPendingImageUpload(null);
+                  setFormData({ ...formData, img: '' });
+                }}
+              >
+                Remove Image
+              </button>
             </div>
           )}
-          <p className="form-note">Note: Uploaded images are auto-optimized and saved in browser storage, not in /public/images on Vercel.</p>
+          <p className="form-note">
+            {cloudMode
+              ? 'Uploaded images are optimized and stored in Supabase Storage bucket: product-images.'
+              : 'Uploaded images are optimized and saved in browser storage, not in /public/images on Vercel.'}
+          </p>
           <label><input type="checkbox" checked={formData.isNew} onChange={(e) => setFormData({ ...formData, isNew: e.target.checked })} /> New Arrival</label>
           <label><input type="checkbox" checked={formData.inStock} onChange={(e) => setFormData({ ...formData, inStock: e.target.checked })} /> In Stock</label>
           <button type="submit" className="btn-success" disabled={isCompressingImage}>{isCompressingImage ? 'Processing Image...' : editIndex !== null ? 'Update' : 'Add'} Product</button>
@@ -419,7 +640,7 @@ function AdminPanel() {
       <div className="products-list">
         <h3>Men's Products</h3>
         {products.mens.map((p, i) => (
-          <div key={i} className="product-item">
+          <div key={p.id || `mens-${i}`} className="product-item">
             <img src={p.img} alt={p.title} />
             <div className="product-info">
               <h4>{p.title}</h4>
@@ -440,7 +661,7 @@ function AdminPanel() {
 
         <h3>Ladies Products</h3>
         {products.ladies.map((p, i) => (
-          <div key={i} className="product-item">
+          <div key={p.id || `ladies-${i}`} className="product-item">
             <img src={p.img} alt={p.title} />
             <div className="product-info">
               <h4>{p.title}</h4>

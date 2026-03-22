@@ -4,13 +4,69 @@ import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import './Collections.css';
 import { mensProducts, ladiesProducts } from '../data/products';
+import { supabase, hasSupabaseConfig } from '../lib/supabaseClient';
 
 function Collections() {
   const [products, setProducts] = React.useState({ mens: mensProducts, ladies: ladiesProducts });
 
   React.useEffect(() => {
-    const saved = localStorage.getItem('veriteProducts');
-    if (saved) setProducts(JSON.parse(saved));
+    const normalizeExternalLink = (link) => {
+      const trimmed = (link || '').trim();
+      if (!trimmed) return '';
+      return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+    };
+
+    const loadProducts = async () => {
+      if (hasSupabaseConfig && supabase) {
+        try {
+          const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          if (error) throw error;
+
+          if (!data || data.length === 0) {
+            setProducts({ mens: mensProducts, ladies: ladiesProducts });
+            return;
+          }
+
+          const mapRow = (row) => ({
+            id: row.id,
+            img: row.img || '',
+            title: row.title || '',
+            description: row.description || '',
+            sizes: row.sizes || '',
+            price: row.price || '',
+            inStock: row.in_stock === undefined ? true : Boolean(row.in_stock),
+            isNew: Boolean(row.is_new),
+            active: row.active === undefined ? true : Boolean(row.active),
+            facebookLink: normalizeExternalLink(row.facebook_link || '')
+          });
+
+          setProducts({
+            mens: data.filter((row) => row.category === 'mens').map(mapRow),
+            ladies: data.filter((row) => row.category === 'ladies').map(mapRow)
+          });
+          return;
+        } catch (err) {
+          console.error('Failed to load cloud products, falling back to local:', err);
+        }
+      }
+
+      const saved = localStorage.getItem('veriteProducts');
+      if (saved) {
+        try {
+          setProducts(JSON.parse(saved));
+          return;
+        } catch (err) {
+          console.error('Failed to parse local products:', err);
+        }
+      }
+      setProducts({ mens: mensProducts, ladies: ladiesProducts });
+    };
+
+    loadProducts();
   }, []);
 
   const settings = {
