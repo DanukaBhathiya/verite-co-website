@@ -9,7 +9,7 @@ function Header() {
           <span className="brand-mark">V</span>
           <div className="brand-copy">
             <h1 className="logo">VÉRITÉ & CO.</h1>
-            <p className="tagline">Modern Fashion Atelier</p>
+            <p className="tagline">YOU REVERYDAY FASHION INSPIRATION</p>
           </div>
         </div>
         <nav className="nav-links">

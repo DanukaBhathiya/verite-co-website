@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './AdminPanel.css';
 import { mensProducts, ladiesProducts } from '../data/products';
 
@@ -22,6 +22,34 @@ function AdminPanel() {
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [isCompressingImage, setIsCompressingImage] = useState(false);
   const [imageStatus, setImageStatus] = useState('');
+  const [dataSyncStatus, setDataSyncStatus] = useState('');
+  const importFileInputRef = useRef(null);
+
+  const normalizeExternalLink = (link) => {
+    const trimmed = String(link || '').trim();
+    if (!trimmed) return '';
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    return `https://${trimmed}`;
+  };
+
+  const sanitizeProduct = (product = {}) => ({
+    ...EMPTY_FORM,
+    ...product,
+    title: String(product.title || '').trim(),
+    description: String(product.description || '').trim(),
+    price: String(product.price || '').trim(),
+    sizes: String(product.sizes || '').trim(),
+    img: String(product.img || '').trim(),
+    facebookLink: normalizeExternalLink(product.facebookLink || ''),
+    inStock: product.inStock === undefined ? true : Boolean(product.inStock),
+    isNew: Boolean(product.isNew),
+    active: product.active === undefined ? true : Boolean(product.active)
+  });
+
+  const normalizeProductSet = (value) => ({
+    mens: Array.isArray(value?.mens) ? value.mens.map(sanitizeProduct) : [],
+    ladies: Array.isArray(value?.ladies) ? value.ladies.map(sanitizeProduct) : []
+  });
 
   useEffect(() => {
     const saved = localStorage.getItem('veriteProducts');
@@ -29,9 +57,31 @@ function AdminPanel() {
 
     try {
       const parsed = JSON.parse(saved);
+      const normalizeLegacy = (items) => (Array.isArray(items) ? items.map((item) => ({
+        ...EMPTY_FORM,
+        ...item,
+        title: String(item.title || '').trim(),
+        description: String(item.description || '').trim(),
+        price: String(item.price || '').trim(),
+        sizes: String(item.sizes || '').trim(),
+        img: String(item.img || '').trim(),
+        facebookLink: (() => {
+          const trimmed = String(item.facebookLink || '').trim();
+          if (!trimmed) return '';
+          return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+        })(),
+        inStock: item.inStock === undefined ? true : Boolean(item.inStock),
+        isNew: Boolean(item.isNew),
+        active: item.active === undefined ? true : Boolean(item.active)
+      })) : []);
+
+      const normalized = {
+        mens: normalizeLegacy(parsed?.mens),
+        ladies: normalizeLegacy(parsed?.ladies)
+      };
       setProducts({
-        mens: Array.isArray(parsed.mens) ? parsed.mens : mensProducts,
-        ladies: Array.isArray(parsed.ladies) ? parsed.ladies : ladiesProducts
+        mens: normalized.mens.length ? normalized.mens : mensProducts,
+        ladies: normalized.ladies.length ? normalized.ladies : ladiesProducts
       });
     } catch (err) {
       console.error('Failed to parse saved products:', err);
@@ -43,11 +93,52 @@ function AdminPanel() {
     localStorage.setItem('veriteProducts', JSON.stringify(newProducts));
   };
 
-  const normalizeExternalLink = (link) => {
-    const trimmed = link.trim();
-    if (!trimmed) return '';
-    if (/^https?:\/\//i.test(trimmed)) return trimmed;
-    return `https://${trimmed}`;
+  const handleExportProducts = () => {
+    try {
+      const payload = JSON.stringify(products, null, 2);
+      const blob = new Blob([payload], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const dateStamp = new Date().toISOString().slice(0, 10);
+      link.href = url;
+      link.download = `verite-products-${dateStamp}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      setDataSyncStatus('Products exported successfully.');
+    } catch (err) {
+      console.error('Export failed:', err);
+      alert('Failed to export products.');
+    }
+  };
+
+  const handleImportProducts = async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    try {
+      const raw = await file.text();
+      const parsed = JSON.parse(raw);
+      const imported = normalizeProductSet(parsed);
+
+      if (!imported.mens.length && !imported.ladies.length) {
+        alert('Import file has no products.');
+        return;
+      }
+
+      const shouldImport = window.confirm('Import will replace current product list. Continue?');
+      if (!shouldImport) return;
+
+      saveProducts(imported);
+      setDataSyncStatus(`Imported ${imported.mens.length + imported.ladies.length} products successfully.`);
+      resetForm();
+    } catch (err) {
+      console.error('Import failed:', err);
+      alert('Invalid JSON file. Please select a valid product export.');
+    } finally {
+      e.target.value = '';
+    }
   };
 
   const fileToDataUrl = (file) => new Promise((resolve, reject) => {
@@ -262,9 +353,25 @@ function AdminPanel() {
   return (
     <div className="admin-panel">
       <h2>Product Management</h2>
-      <button onClick={() => setShowForm(!showForm)} className="btn-primary">
-        {showForm ? 'Cancel' : '+ Add Product'}
-      </button>
+      <div className="admin-top-actions">
+        <button onClick={() => setShowForm(!showForm)} className="btn-primary">
+          {showForm ? 'Cancel' : '+ Add Product'}
+        </button>
+        <button type="button" onClick={handleExportProducts} className="btn-secondary">
+          Export Products
+        </button>
+        <button type="button" onClick={() => importFileInputRef.current?.click()} className="btn-secondary">
+          Import Products
+        </button>
+        <input
+          ref={importFileInputRef}
+          type="file"
+          accept=".json,application/json"
+          onChange={handleImportProducts}
+          style={{ display: 'none' }}
+        />
+      </div>
+      {dataSyncStatus && <p className="sync-status">{dataSyncStatus}</p>}
 
       {showForm && (
         <form onSubmit={handleSubmit} className="product-form">
@@ -272,10 +379,10 @@ function AdminPanel() {
             <option value="mens">Men's</option>
             <option value="ladies">Ladies</option>
           </select>
-          <input placeholder="Title" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} required />
-          <textarea placeholder="Description" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} required />
-          <input placeholder="Price" value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value})} required />
-          <input placeholder="Sizes (optional)" value={formData.sizes} onChange={(e) => setFormData({...formData, sizes: e.target.value})} />
+          <input placeholder="Title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} required />
+          <textarea placeholder="Description" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} required />
+          <input placeholder="Price" value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} required />
+          <input placeholder="Sizes (optional)" value={formData.sizes} onChange={(e) => setFormData({ ...formData, sizes: e.target.value })} />
           <input
             placeholder="Facebook product link (optional)"
             value={formData.facebookLink}
@@ -285,7 +392,7 @@ function AdminPanel() {
           <input type="file" accept="image/*" onChange={handleImageUpload} />
           {imageStatus && <p className="form-status">{imageStatus}</p>}
           <p className="form-hint">Or enter image path/URL manually (example: /images/product.jpg)</p>
-          <input placeholder="Image path or URL" value={formData.img} onChange={(e) => setFormData({...formData, img: e.target.value})} />
+          <input placeholder="Image path or URL" value={formData.img} onChange={(e) => setFormData({ ...formData, img: e.target.value })} />
           {formData.img && (
             <div className="image-preview">
               <img src={formData.img} alt="Product preview" />
@@ -293,8 +400,8 @@ function AdminPanel() {
             </div>
           )}
           <p className="form-note">Note: Uploaded images are auto-optimized and saved in browser storage, not in /public/images on Vercel.</p>
-          <label><input type="checkbox" checked={formData.isNew} onChange={(e) => setFormData({...formData, isNew: e.target.checked})} /> New Arrival</label>
-          <label><input type="checkbox" checked={formData.inStock} onChange={(e) => setFormData({...formData, inStock: e.target.checked})} /> In Stock</label>
+          <label><input type="checkbox" checked={formData.isNew} onChange={(e) => setFormData({ ...formData, isNew: e.target.checked })} /> New Arrival</label>
+          <label><input type="checkbox" checked={formData.inStock} onChange={(e) => setFormData({ ...formData, inStock: e.target.checked })} /> In Stock</label>
           <button type="submit" className="btn-success" disabled={isCompressingImage}>{isCompressingImage ? 'Processing Image...' : editIndex !== null ? 'Update' : 'Add'} Product</button>
         </form>
       )}
