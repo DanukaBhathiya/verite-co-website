@@ -307,7 +307,7 @@ function AdminPanel() {
         (index === editIndex ? payload : item)
       );
     } else {
-      newProducts[category] = [...newProducts[category], payload];
+      newProducts[category] = [payload, ...newProducts[category]];
     }
     saveProducts(newProducts);
     resetForm();
