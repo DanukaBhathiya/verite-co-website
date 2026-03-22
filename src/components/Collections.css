@@ -1,71 +1,71 @@
 .collections {
-  padding: 5rem 2rem;
-  background: #f9f9f9;
-}
-
-.collections .container {
-  max-width: 1200px;
-  margin: 0 auto;
+  padding: 5.5rem 0;
 }
 
 .collections h2 {
   text-align: center;
-  font-size: 2.5rem;
-  margin-bottom: 3rem;
-  color: #1a1a1a;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2.3rem, 5vw, 3.4rem);
+  margin-bottom: 2.8rem;
+  color: var(--text);
 }
 
 .carousel-section {
-  margin-bottom: 4rem;
+  margin-bottom: 4.2rem;
 }
 
 .carousel-section h3 {
-  font-size: 2rem;
-  margin-bottom: 2rem;
-  color: #1a1a1a;
+  font-size: 0.9rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  color: var(--accent-dark);
   text-align: center;
 }
 
 .carousel-item {
-  padding: 0 15px;
+  padding: 0 12px;
 }
 
 .collection-card {
-  background: #fff;
-  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid rgba(20, 20, 20, 0.1);
+  border-radius: 18px;
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-  transition: transform 0.3s;
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   position: relative;
   cursor: pointer;
-  height: 500px;
+  height: 520px;
   display: flex;
   flex-direction: column;
 }
 
 .badge {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: bold;
+  top: 12px;
+  right: 12px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 800;
   z-index: 2;
+  letter-spacing: 0.08em;
 }
 
 .badge.new {
-  background: #4CAF50;
-  color: white;
+  background: #2f9f5a;
+  color: #fff;
 }
 
 .badge.out-of-stock {
-  background: #f44336;
-  color: white;
+  background: #bf2d2d;
+  color: #fff;
 }
 
 .collection-card:hover {
   transform: translateY(-5px);
+  box-shadow: var(--shadow-strong);
 }
 
 .collection-card:hover .card-overlay {
@@ -74,21 +74,25 @@
 
 .collection-card img {
   width: 100%;
-  height: 400px;
+  height: 390px;
   object-fit: contain;
-  background: #f5f5f5;
+  background: linear-gradient(180deg, #f3ede2 0%, #ece1cf 100%);
   flex-shrink: 0;
 }
 
+.product-image-link {
+  display: block;
+}
+
 .card-content {
-  padding: 1.5rem;
+  padding: 1.25rem 1rem;
   text-align: center;
 }
 
 .collection-card h4 {
   font-size: 1.3rem;
-  color: #1a1a1a;
-  margin: 0 0 0.5rem 0;
+  color: var(--text);
+  margin: 0 0 0.55rem 0;
 }
 
 .card-overlay {
@@ -97,11 +101,12 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.9);
+  background: rgba(16, 16, 16, 0.88);
+  backdrop-filter: blur(1px);
   color: #fff;
-  padding: 2rem;
+  padding: 1.8rem;
   opacity: 0;
-  transition: opacity 0.3s;
+  transition: opacity 0.28s ease;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -110,76 +115,129 @@
 
 .card-overlay h4 {
   color: #fff;
-  margin-bottom: 1rem;
+  margin-bottom: 0.9rem;
 }
 
 .description {
-  font-size: 0.9rem;
-  color: #ddd;
-  line-height: 1.5;
-  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.92);
+  line-height: 1.55;
+  margin-bottom: 0.9rem;
 }
 
 .sizes {
-  font-size: 0.9rem;
-  color: #ffd700;
+  font-size: 0.88rem;
+  color: #ffdd8b;
   margin-bottom: 0.5rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .price {
-  font-size: 1.1rem;
-  font-weight: bold;
+  font-size: 1.08rem;
+  font-weight: 800;
   margin: 0;
 }
 
 .card-content .price {
-  color: #1a1a1a;
+  color: var(--text);
 }
 
 .card-overlay .price {
-  color: #ffd700;
+  color: #ffe7b3;
+}
+
+.product-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.7rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--accent-dark);
+  background: rgba(184, 133, 56, 0.16);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.product-link:hover {
+  background: rgba(184, 133, 56, 0.26);
+  transform: translateY(-1px);
+}
+
+.overlay-link {
+  margin-top: 0.9rem;
+  color: #121212;
+  background: #ffe7b3;
+}
+
+.overlay-link:hover {
+  background: #ffd680;
 }
 
 .stock-status {
-  color: #ff6b6b;
+  color: #ffafaf;
   font-weight: bold;
-  margin-top: 0.5rem;
+  margin-top: 0.55rem;
 }
 
-.slick-prev, .slick-next {
-  z-index: 1;
+.slick-prev,
+.slick-next {
+  z-index: 2;
 }
 
 .slick-prev {
-  left: -35px;
+  left: -32px;
 }
 
 .slick-next {
-  right: -35px;
+  right: -32px;
+}
+
+.slick-prev:before,
+.slick-next:before {
+  font-size: 28px;
+  color: var(--accent-dark);
 }
 
 .slick-dots {
-  bottom: -40px;
+  bottom: -34px;
+}
+
+.slick-dots li button:before {
+  color: #ad8f62;
+  opacity: 0.5;
+}
+
+.slick-dots li.slick-active button:before {
+  color: var(--accent-dark);
+  opacity: 1;
+}
+
+@media (max-width: 1024px) {
+  .collection-card {
+    height: 500px;
+  }
+
+  .collection-card img {
+    height: 360px;
+  }
 }
 
 @media (max-width: 768px) {
   .collections {
-    padding: 3rem 1rem;
+    padding: 4rem 0;
   }
 
   .collections h2 {
-    font-size: 2rem;
     margin-bottom: 2rem;
   }
 
   .carousel-section {
-    margin-bottom: 2.5rem;
-  }
-
-  .carousel-section h3 {
-    font-size: 1.4rem;
-    margin-bottom: 1rem;
+    margin-bottom: 2.8rem;
   }
 
   .carousel-item {
@@ -235,27 +293,28 @@
     line-height: 1.4;
   }
 
+  .product-link {
+    font-size: 0.7rem;
+    padding: 0.4rem 0.72rem;
+  }
+
   .slick-prev,
   .slick-next {
     display: none !important;
   }
 
   .slick-dots {
-    bottom: -28px;
+    bottom: -24px;
   }
 }
 
 @media (max-width: 480px) {
   .collections {
-    padding: 2.5rem 0.75rem;
+    padding: 3.4rem 0;
   }
 
   .carousel-item {
     padding: 0 4px;
-  }
-
-  .card-content {
-    padding: 0.85rem;
   }
 
   .collection-card {
@@ -266,12 +325,16 @@
     height: 270px;
   }
 
-  .card-content .price {
-    min-height: 2.4rem;
+  .card-content {
+    padding: 0.85rem;
   }
 
   .collection-card h4 {
     font-size: 1rem;
+    min-height: 2.4rem;
+  }
+
+  .card-content .price {
     min-height: 2.4rem;
   }
 

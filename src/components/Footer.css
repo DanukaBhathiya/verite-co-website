@@ -1,15 +1,12 @@
 .footer {
-  background: #1a1a1a;
-  color: #fff;
-  padding: 2rem;
-  text-align: center;
-}
-
-.footer .container {
-  max-width: 1200px;
-  margin: 0 auto;
+  padding: 2rem 0 2.4rem;
+  border-top: 1px solid rgba(20, 20, 20, 0.09);
+  background: linear-gradient(180deg, rgba(248, 244, 237, 0) 0%, rgba(20, 20, 20, 0.06) 100%);
 }
 
 .footer p {
-  opacity: 0.8;
+  text-align: center;
+  color: #514b43;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
 }

@@ -1,28 +1,36 @@
 .about {
-  padding: 5rem 2rem;
-  background: #fff;
+  padding: 5.5rem 0;
 }
 
 .about .container {
-  max-width: 800px;
-  margin: 0 auto;
+  max-width: 860px;
   text-align: center;
+  background: var(--surface);
+  border: 1px solid rgba(20, 20, 20, 0.08);
+  border-radius: 22px;
+  padding: 3rem 2rem;
+  box-shadow: var(--shadow-soft);
 }
 
 .about h2 {
-  font-size: 2.5rem;
-  margin-bottom: 2rem;
-  color: #1a1a1a;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2.2rem, 5vw, 3.2rem);
+  margin-bottom: 1rem;
+  color: var(--text);
 }
 
 .about p {
-  font-size: 1.1rem;
+  font-size: 1.08rem;
   line-height: 1.8;
-  color: #555;
+  color: var(--muted);
 }
 
 @media (max-width: 768px) {
   .about {
-    padding: 3rem 1rem;
+    padding: 4rem 0;
+  }
+
+  .about .container {
+    padding: 2.2rem 1.3rem;
   }
 }

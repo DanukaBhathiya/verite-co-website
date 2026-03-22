@@ -5,8 +5,14 @@ function Header() {
   return (
     <header className="header">
       <div className="container">
-        <h1 className="logo">Verite & Co.</h1>
-        <nav>
+        <div className="brand">
+          <span className="brand-mark">V</span>
+          <div className="brand-copy">
+            <h1 className="logo">VÉRITÉ & CO.</h1>
+            <p className="tagline">Modern Fashion Atelier</p>
+          </div>
+        </div>
+        <nav className="nav-links">
           <a href="#home">Home</a>
           <a href="#collections">Collections</a>
           <a href="#about">About</a>

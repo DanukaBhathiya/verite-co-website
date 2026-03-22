@@ -1,11 +1,42 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg: #f4f1ea;
+  --surface: #fffdf8;
+  --text: #141414;
+  --muted: #5f5a51;
+  --accent: #b88538;
+  --accent-dark: #8b6427;
+  --shadow-soft: 0 12px 35px rgba(20, 20, 20, 0.08);
+  --shadow-strong: 0 22px 55px rgba(20, 20, 20, 0.16);
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  font-family: 'Manrope', 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background:
+    radial-gradient(circle at 5% -10%, rgba(184, 133, 56, 0.18), transparent 35%),
+    radial-gradient(circle at 95% 2%, rgba(20, 20, 20, 0.12), transparent 28%),
+    var(--bg);
+  color: var(--text);
+}
+
+a {
+  color: inherit;
+}
+
+.container {
+  width: min(1120px, 92%);
+  margin: 0 auto;
 }

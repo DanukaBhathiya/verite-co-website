@@ -4,10 +4,15 @@ import './Hero.css';
 function Hero() {
   return (
     <section id="home" className="hero">
+      <div className="hero-ambient" aria-hidden="true" />
       <div className="hero-content">
-        <h2>Verite & Co.</h2>
-        <p>Premium Fashion for Gents & Women</p>
-        <a href="#collections" className="cta-button">Shop Now</a>
+        <p className="hero-kicker">Homagama | Colombo</p>
+        <h2>Elevated essentials for him and her.</h2>
+        <p>VÉRITÉ & CO. curates clean silhouettes, statement textures, and timeless pieces for everyday confidence.</p>
+        <div className="hero-actions">
+          <a href="#collections" className="cta-button">Explore Collections</a>
+          <a href="https://wa.me/94712524052" target="_blank" rel="noopener noreferrer" className="cta-button secondary">Talk on WhatsApp</a>
+        </div>
       </div>
     </section>
   );

@@ -36,6 +36,11 @@ function Collections() {
   };
 
   const activeProducts = (prods) => prods.filter(p => p.active);
+  const getProductLink = (product) => {
+    const link = (product.facebookLink || '').trim();
+    if (!link) return '';
+    return /^https?:\/\//i.test(link) ? link : `https://${link}`;
+  };
 
   return (
     <section id="collections" className="collections">
@@ -50,16 +55,37 @@ function Collections() {
                 <div className="collection-card">
                   {product.isNew && <span className="badge new">NEW</span>}
                   {!product.inStock && <span className="badge out-of-stock">OUT OF STOCK</span>}
-                  <img src={product.img} alt={product.title} />
+                  {getProductLink(product) ? (
+                    <a
+                      href={getProductLink(product)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="product-image-link"
+                    >
+                      <img src={product.img} alt={product.title} />
+                    </a>
+                  ) : (
+                    <img src={product.img} alt={product.title} />
+                  )}
                   <div className="card-content">
                     <h4>{product.title}</h4>
                     <p className="price">{product.price}</p>
+                    {getProductLink(product) && (
+                      <a href={getProductLink(product)} target="_blank" rel="noopener noreferrer" className="product-link">
+                        View on Facebook
+                      </a>
+                    )}
                   </div>
                   <div className="card-overlay">
                     <h4>{product.title}</h4>
                     <p className="description">{product.description}</p>
                     {product.sizes && <p className="sizes">Sizes: {product.sizes}</p>}
                     <p className="price">{product.price}</p>
+                    {getProductLink(product) && (
+                      <a href={getProductLink(product)} target="_blank" rel="noopener noreferrer" className="product-link overlay-link">
+                        Open Facebook Post
+                      </a>
+                    )}
                     {!product.inStock && <p className="stock-status">Currently Out of Stock</p>}
                   </div>
                 </div>
@@ -76,15 +102,36 @@ function Collections() {
                 <div className="collection-card">
                   {product.isNew && <span className="badge new">NEW</span>}
                   {!product.inStock && <span className="badge out-of-stock">OUT OF STOCK</span>}
-                  <img src={product.img} alt={product.title} />
+                  {getProductLink(product) ? (
+                    <a
+                      href={getProductLink(product)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="product-image-link"
+                    >
+                      <img src={product.img} alt={product.title} />
+                    </a>
+                  ) : (
+                    <img src={product.img} alt={product.title} />
+                  )}
                   <div className="card-content">
                     <h4>{product.title}</h4>
                     <p className="price">{product.price}</p>
+                    {getProductLink(product) && (
+                      <a href={getProductLink(product)} target="_blank" rel="noopener noreferrer" className="product-link">
+                        View on Facebook
+                      </a>
+                    )}
                   </div>
                   <div className="card-overlay">
                     <h4>{product.title}</h4>
                     <p className="description">{product.description}</p>
                     <p className="price">{product.price}</p>
+                    {getProductLink(product) && (
+                      <a href={getProductLink(product)} target="_blank" rel="noopener noreferrer" className="product-link overlay-link">
+                        Open Facebook Post
+                      </a>
+                    )}
                     {!product.inStock && <p className="stock-status">Currently Out of Stock</p>}
                   </div>
                 </div>

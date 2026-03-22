@@ -8,6 +8,7 @@ const EMPTY_FORM = {
   price: '',
   sizes: '',
   img: '',
+  facebookLink: '',
   inStock: true,
   isNew: false,
   active: true
@@ -40,6 +41,13 @@ function AdminPanel() {
   const saveProducts = (newProducts) => {
     setProducts(newProducts);
     localStorage.setItem('veriteProducts', JSON.stringify(newProducts));
+  };
+
+  const normalizeExternalLink = (link) => {
+    const trimmed = link.trim();
+    if (!trimmed) return '';
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    return `https://${trimmed}`;
   };
 
   const fileToDataUrl = (file) => new Promise((resolve, reject) => {
@@ -198,7 +206,8 @@ function AdminPanel() {
       description: formData.description.trim(),
       price: formData.price.trim(),
       sizes: formData.sizes.trim(),
-      img: cleanImage
+      img: cleanImage,
+      facebookLink: normalizeExternalLink(formData.facebookLink || '')
     };
 
     const newProducts = { ...products };
@@ -216,7 +225,12 @@ function AdminPanel() {
   const handleEdit = (cat, index) => {
     setCategory(cat);
     setEditIndex(index);
-    setFormData({ ...products[cat][index] });
+    const product = products[cat][index];
+    setFormData({
+      ...EMPTY_FORM,
+      ...product,
+      facebookLink: product.facebookLink || ''
+    });
     setShowForm(true);
   };
 
@@ -262,6 +276,11 @@ function AdminPanel() {
           <textarea placeholder="Description" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} required />
           <input placeholder="Price" value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value})} required />
           <input placeholder="Sizes (optional)" value={formData.sizes} onChange={(e) => setFormData({...formData, sizes: e.target.value})} />
+          <input
+            placeholder="Facebook product link (optional)"
+            value={formData.facebookLink}
+            onChange={(e) => setFormData({ ...formData, facebookLink: e.target.value })}
+          />
           <label className="field-label">Upload Product Image</label>
           <input type="file" accept="image/*" onChange={handleImageUpload} />
           {imageStatus && <p className="form-status">{imageStatus}</p>}
@@ -288,6 +307,9 @@ function AdminPanel() {
             <div className="product-info">
               <h4>{p.title}</h4>
               <p>{p.price}</p>
+              {p.facebookLink && (
+                <a href={p.facebookLink} target="_blank" rel="noopener noreferrer">Facebook Link</a>
+              )}
               <span className={p.inStock ? 'in-stock' : 'out-stock'}>{p.inStock ? 'In Stock' : 'Out of Stock'}</span>
               {p.isNew && <span className="new-badge">NEW</span>}
             </div>
@@ -306,6 +328,9 @@ function AdminPanel() {
             <div className="product-info">
               <h4>{p.title}</h4>
               <p>{p.price}</p>
+              {p.facebookLink && (
+                <a href={p.facebookLink} target="_blank" rel="noopener noreferrer">Facebook Link</a>
+              )}
               <span className={p.inStock ? 'in-stock' : 'out-stock'}>{p.inStock ? 'In Stock' : 'Out of Stock'}</span>
               {p.isNew && <span className="new-badge">NEW</span>}
             </div>
