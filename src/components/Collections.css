@@ -167,12 +167,83 @@
   .collections {
     padding: 3rem 1rem;
   }
-  
-  .slick-prev {
-    left: -10px;
+
+  .collections h2 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
   }
-  
+
+  .carousel-section {
+    margin-bottom: 2.5rem;
+  }
+
+  .carousel-section h3 {
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+  }
+
+  .carousel-item {
+    padding: 0 8px;
+  }
+
+  .collection-card {
+    height: auto;
+    min-height: 0;
+  }
+
+  .collection-card img {
+    height: auto;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+  }
+
+  .card-content {
+    padding: 1rem;
+  }
+
+  .collection-card h4 {
+    font-size: 1.1rem;
+  }
+
+  .price {
+    font-size: 1rem;
+  }
+
+  .description,
+  .sizes,
+  .stock-status {
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+
+  .slick-prev,
   .slick-next {
-    right: -10px;
+    display: none !important;
+  }
+
+  .slick-dots {
+    bottom: -28px;
+  }
+}
+
+@media (max-width: 480px) {
+  .collections {
+    padding: 2.5rem 0.75rem;
+  }
+
+  .carousel-item {
+    padding: 0 4px;
+  }
+
+  .card-content {
+    padding: 0.85rem;
+  }
+
+  .collection-card h4 {
+    font-size: 1rem;
+  }
+
+  .price {
+    font-size: 0.95rem;
   }
 }
