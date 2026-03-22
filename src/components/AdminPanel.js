@@ -19,6 +19,8 @@ function AdminPanel() {
   const [category, setCategory] = useState('mens');
   const [editIndex, setEditIndex] = useState(null);
   const [formData, setFormData] = useState(EMPTY_FORM);
+  const [isCompressingImage, setIsCompressingImage] = useState(false);
+  const [imageStatus, setImageStatus] = useState('');
 
   useEffect(() => {
     const saved = localStorage.getItem('veriteProducts');
@@ -47,6 +49,100 @@ function AdminPanel() {
     reader.readAsDataURL(file);
   });
 
+  const loadImageElement = (dataUrl) => new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+    image.src = dataUrl;
+  });
+
+  const canvasToBlob = (canvas, quality) => new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          reject(new Error('Failed to create compressed image blob.'));
+          return;
+        }
+        resolve(blob);
+      },
+      'image/jpeg',
+      quality
+    );
+  });
+
+  const formatBytes = (bytes) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+  };
+
+  const compressImageFile = async (file) => {
+    const sourceDataUrl = await fileToDataUrl(file);
+    const sourceImage = await loadImageElement(sourceDataUrl);
+
+    const MAX_DIMENSION = 1400;
+    const TARGET_SIZE_BYTES = 450 * 1024;
+    const MIN_QUALITY = 0.45;
+    const QUALITY_STEP = 0.07;
+    const SCALE_STEP = 0.85;
+    const MIN_DIMENSION = 700;
+
+    let width = sourceImage.width;
+    let height = sourceImage.height;
+    if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+      const ratio = Math.min(MAX_DIMENSION / width, MAX_DIMENSION / height);
+      width = Math.max(1, Math.round(width * ratio));
+      height = Math.max(1, Math.round(height * ratio));
+    }
+
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    if (!context) {
+      throw new Error('Could not initialize image processing.');
+    }
+
+    const drawSource = (drawWidth, drawHeight) => {
+      canvas.width = drawWidth;
+      canvas.height = drawHeight;
+      context.clearRect(0, 0, drawWidth, drawHeight);
+      context.drawImage(sourceImage, 0, 0, drawWidth, drawHeight);
+    };
+
+    drawSource(width, height);
+
+    let quality = 0.9;
+    let blob = await canvasToBlob(canvas, quality);
+
+    while (blob.size > TARGET_SIZE_BYTES && quality > MIN_QUALITY) {
+      quality = Math.max(MIN_QUALITY, quality - QUALITY_STEP);
+      blob = await canvasToBlob(canvas, quality);
+    }
+
+    while (
+      blob.size > TARGET_SIZE_BYTES &&
+      width > MIN_DIMENSION &&
+      height > MIN_DIMENSION
+    ) {
+      width = Math.max(MIN_DIMENSION, Math.round(width * SCALE_STEP));
+      height = Math.max(MIN_DIMENSION, Math.round(height * SCALE_STEP));
+      drawSource(width, height);
+
+      quality = 0.82;
+      blob = await canvasToBlob(canvas, quality);
+      while (blob.size > TARGET_SIZE_BYTES && quality > MIN_QUALITY) {
+        quality = Math.max(MIN_QUALITY, quality - QUALITY_STEP);
+        blob = await canvasToBlob(canvas, quality);
+      }
+    }
+
+    const compressedDataUrl = await fileToDataUrl(blob);
+    return {
+      dataUrl: compressedDataUrl,
+      originalBytes: file.size,
+      compressedBytes: blob.size
+    };
+  };
+
   const handleImageUpload = async (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
@@ -57,24 +153,39 @@ function AdminPanel() {
       return;
     }
 
-    const MAX_IMAGE_SIZE = 1.5 * 1024 * 1024; // 1.5MB
-    if (file.size > MAX_IMAGE_SIZE) {
-      alert('Image is too large. Please choose an image smaller than 1.5MB.');
+    const MAX_SOURCE_SIZE = 12 * 1024 * 1024; // 12MB
+    if (file.size > MAX_SOURCE_SIZE) {
+      alert('Image is too large. Please choose an image smaller than 12MB.');
       e.target.value = '';
       return;
     }
 
+    setIsCompressingImage(true);
+    setImageStatus('Optimizing image...');
+
     try {
-      const imageDataUrl = await fileToDataUrl(file);
-      setFormData((prev) => ({ ...prev, img: imageDataUrl }));
+      const compressed = await compressImageFile(file);
+      setFormData((prev) => ({ ...prev, img: compressed.dataUrl }));
+      setImageStatus(
+        `Image optimized: ${formatBytes(compressed.originalBytes)} -> ${formatBytes(compressed.compressedBytes)}`
+      );
     } catch (err) {
       console.error('Failed to read image file:', err);
-      alert('Failed to read image. Please try another file.');
+      alert('Failed to process image. Please try another file.');
+      setImageStatus('');
+    } finally {
+      setIsCompressingImage(false);
+      e.target.value = '';
     }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (isCompressingImage) {
+      alert('Please wait until image optimization is complete.');
+      return;
+    }
+
     const cleanImage = formData.img.trim();
     if (!cleanImage) {
       alert('Please upload an image or provide an image path/URL.');
@@ -127,6 +238,8 @@ function AdminPanel() {
 
   const resetForm = () => {
     setFormData(EMPTY_FORM);
+    setImageStatus('');
+    setIsCompressingImage(false);
     setShowForm(false);
     setCategory('mens');
     setEditIndex(null);
@@ -151,6 +264,7 @@ function AdminPanel() {
           <input placeholder="Sizes (optional)" value={formData.sizes} onChange={(e) => setFormData({...formData, sizes: e.target.value})} />
           <label className="field-label">Upload Product Image</label>
           <input type="file" accept="image/*" onChange={handleImageUpload} />
+          {imageStatus && <p className="form-status">{imageStatus}</p>}
           <p className="form-hint">Or enter image path/URL manually (example: /images/product.jpg)</p>
           <input placeholder="Image path or URL" value={formData.img} onChange={(e) => setFormData({...formData, img: e.target.value})} />
           {formData.img && (
@@ -159,10 +273,10 @@ function AdminPanel() {
               <button type="button" onClick={() => setFormData({ ...formData, img: '' })}>Remove Image</button>
             </div>
           )}
-          <p className="form-note">Note: Uploaded images are saved in this browser storage, not in /public/images on Vercel.</p>
+          <p className="form-note">Note: Uploaded images are auto-optimized and saved in browser storage, not in /public/images on Vercel.</p>
           <label><input type="checkbox" checked={formData.isNew} onChange={(e) => setFormData({...formData, isNew: e.target.checked})} /> New Arrival</label>
           <label><input type="checkbox" checked={formData.inStock} onChange={(e) => setFormData({...formData, inStock: e.target.checked})} /> In Stock</label>
-          <button type="submit" className="btn-success">{editIndex !== null ? 'Update' : 'Add'} Product</button>
+          <button type="submit" className="btn-success" disabled={isCompressingImage}>{isCompressingImage ? 'Processing Image...' : editIndex !== null ? 'Update' : 'Add'} Product</button>
         </form>
       )}
 
