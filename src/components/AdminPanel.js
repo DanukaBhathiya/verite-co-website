@@ -25,6 +25,7 @@ function AdminPanel() {
   const [isCompressingImage, setIsCompressingImage] = useState(false);
   const [imageStatus, setImageStatus] = useState('');
   const [dataSyncStatus, setDataSyncStatus] = useState('');
+  const [isCloudConnected, setIsCloudConnected] = useState(false);
   const [pendingImageUpload, setPendingImageUpload] = useState(null);
   const importFileInputRef = useRef(null);
   const formRef = useRef(null);
@@ -129,11 +130,13 @@ function AdminPanel() {
           });
           setProducts(normalized);
           if (mounted) {
+            setIsCloudConnected(true);
             setDataSyncStatus('Cloud sync enabled (Supabase).');
           }
         } catch (err) {
           console.error('Cloud load failed, falling back to local:', err);
           if (mounted) {
+            setIsCloudConnected(false);
             const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
             if (saved) {
               try {
@@ -153,6 +156,7 @@ function AdminPanel() {
       }
 
       if (mounted) {
+        setIsCloudConnected(false);
         const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
         if (saved) {
           try {
@@ -578,9 +582,11 @@ function AdminPanel() {
         />
       </div>
       <p className="sync-hint">
-        {cloudMode
+        {cloudMode && isCloudConnected
           ? 'Cloud mode (Supabase) is enabled. Changes are shared across devices.'
-          : 'Local mode: data is stored per device/browser. Use Export and Import to sync.'}
+          : cloudMode
+            ? 'Cloud mode is configured, but connection failed. Using local mode now.'
+            : 'Local mode: data is stored per device/browser. Use Export and Import to sync.'}
       </p>
       {dataSyncStatus && <p className="sync-status">{dataSyncStatus}</p>}
 
