@@ -6,7 +6,9 @@ function Header() {
     <header className="header">
       <div className="container">
         <div className="brand">
-          <span className="brand-mark">V</span>
+          <div className="brand-mark">
+            <img src="/images/logo.png" alt="Verite & Co logo" className="brand-logo-image" />
+          </div>
           <div className="brand-copy">
             <h1 className="logo">VÉRITÉ & CO.</h1>
             <p className="tagline">YOU REVERYDAY FASHION INSPIRATION</p>

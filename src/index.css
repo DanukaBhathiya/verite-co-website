@@ -1,14 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap');
 
 :root {
-  --bg: #f4f1ea;
-  --surface: #fffdf8;
-  --text: #141414;
-  --muted: #5f5a51;
-  --accent: #b88538;
-  --accent-dark: #8b6427;
-  --shadow-soft: 0 12px 35px rgba(20, 20, 20, 0.08);
-  --shadow-strong: 0 22px 55px rgba(20, 20, 20, 0.16);
+  --bg: #faf7ff;
+  --surface: #ffffff;
+  --text: #2d2447;
+  --muted: #7f73a1;
+  --accent: #b39ddb;
+  --accent-dark: #8e79c9;
+  --shadow-soft: 0 12px 35px rgba(108, 87, 163, 0.12);
+  --shadow-strong: 0 22px 55px rgba(108, 87, 163, 0.2);
 }
 
 * {
@@ -26,8 +26,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background:
-    radial-gradient(circle at 5% -10%, rgba(184, 133, 56, 0.18), transparent 35%),
-    radial-gradient(circle at 95% 2%, rgba(20, 20, 20, 0.12), transparent 28%),
+    radial-gradient(circle at 5% -10%, rgba(179, 157, 219, 0.28), transparent 40%),
+    radial-gradient(circle at 95% 2%, rgba(142, 121, 201, 0.15), transparent 34%),
     var(--bg);
   color: var(--text);
 }

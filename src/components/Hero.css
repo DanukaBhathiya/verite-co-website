@@ -3,9 +3,9 @@
   overflow: hidden;
   padding: 7rem 0 6rem;
   background:
-    radial-gradient(circle at 18% 22%, rgba(184, 133, 56, 0.24), transparent 34%),
-    radial-gradient(circle at 82% 12%, rgba(20, 20, 20, 0.14), transparent 40%),
-    linear-gradient(135deg, #f8f4ed 0%, #ede5d8 60%, #e7dccd 100%);
+    radial-gradient(circle at 18% 22%, rgba(179, 157, 219, 0.3), transparent 34%),
+    radial-gradient(circle at 82% 12%, rgba(142, 121, 201, 0.15), transparent 40%),
+    linear-gradient(135deg, #ffffff 0%, #f6f2ff 60%, #f1eaff 100%);
 }
 
 .hero-ambient {
@@ -14,7 +14,7 @@
   width: 520px;
   height: 520px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(184, 133, 56, 0.28) 0%, rgba(184, 133, 56, 0) 70%);
+  background: radial-gradient(circle, rgba(179, 157, 219, 0.35) 0%, rgba(179, 157, 219, 0) 70%);
   pointer-events: none;
 }
 
@@ -78,7 +78,7 @@
 
 .cta-button.secondary {
   background: rgba(255, 255, 255, 0.55);
-  border-color: rgba(20, 20, 20, 0.12);
+  border-color: rgba(142, 121, 201, 0.25);
   color: var(--text);
   box-shadow: none;
 }
