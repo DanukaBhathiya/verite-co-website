@@ -150,10 +150,10 @@ function Reviews() {
       <div className="container">
         <div className="reviews-head">
           <h2>Customer Reviews</h2>
-          <p className="reviews-subtitle">Share your shopping experience with Verite &amp; Co.</p>
+          <p className="reviews-subtitle">Share your shopping experience with {'V\u00C9RIT\u00C9'}.</p>
           <div className="reviews-summary">
             <strong>{reviews.length ? averageRating.toFixed(1) : '0.0'}</strong>
-            <span>{'★'.repeat(Math.round(averageRating || 0)).padEnd(5, '☆')}</span>
+            <span>{'\u2605'.repeat(Math.round(averageRating || 0)).padEnd(5, '\u2606')}</span>
             <em>({reviews.length} review{reviews.length === 1 ? '' : 's'})</em>
           </div>
           {status && <p className="reviews-status">{status}</p>}
@@ -209,7 +209,7 @@ function Reviews() {
                 <article key={review.id} className="review-card">
                   <div className="review-card-top">
                     <h4>{review.name}</h4>
-                    <span className="review-stars">{'★'.repeat(review.rating).padEnd(5, '☆')}</span>
+                    <span className="review-stars">{'\u2605'.repeat(review.rating).padEnd(5, '\u2606')}</span>
                   </div>
                   <p className="review-comment">{review.comment}</p>
                   <time className="review-date">
