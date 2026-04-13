@@ -124,7 +124,7 @@ function App() {
                   style={{
                     flex: 1,
                     padding: '10px',
-                    background: '#a88fd8',
+                    background: 'linear-gradient(135deg, #f3a6cc, #b39ddb, #9fd9ff)',
                     color: 'white',
                     border: 'none',
                     borderRadius: '5px',
@@ -139,7 +139,7 @@ function App() {
                   style={{
                     flex: 1,
                     padding: '10px',
-                    background: '#8d7ab9',
+                    background: 'linear-gradient(135deg, #8e79c9, #7f73a1)',
                     color: 'white',
                     border: 'none',
                     borderRadius: '5px',
@@ -163,7 +163,7 @@ function App() {
               top: '20px',
               right: '20px',
               padding: '10px 20px',
-              background: '#8e79c9',
+              background: 'linear-gradient(135deg, #f3a6cc, #8e79c9)',
               color: 'white',
               border: 'none',
               borderRadius: '5px',

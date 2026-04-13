@@ -7,8 +7,12 @@
   --muted: #7f73a1;
   --accent: #b39ddb;
   --accent-dark: #8e79c9;
-  --shadow-soft: 0 12px 35px rgba(108, 87, 163, 0.12);
-  --shadow-strong: 0 22px 55px rgba(108, 87, 163, 0.2);
+  --accent-rose: #f3a6cc;
+  --accent-sky: #9fd9ff;
+  --accent-mint: #a9eccd;
+  --accent-peach: #ffd8b0;
+  --shadow-soft: 0 12px 35px rgba(108, 87, 163, 0.16);
+  --shadow-strong: 0 22px 55px rgba(108, 87, 163, 0.24);
 }
 
 * {
@@ -26,8 +30,9 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background:
-    radial-gradient(circle at 5% -10%, rgba(179, 157, 219, 0.28), transparent 40%),
-    radial-gradient(circle at 95% 2%, rgba(142, 121, 201, 0.15), transparent 34%),
+    radial-gradient(circle at 4% -12%, rgba(159, 217, 255, 0.3), transparent 38%),
+    radial-gradient(circle at 95% 3%, rgba(243, 166, 204, 0.26), transparent 34%),
+    radial-gradient(circle at 55% 100%, rgba(169, 236, 205, 0.22), transparent 40%),
     var(--bg);
   color: var(--text);
 }

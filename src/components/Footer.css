@@ -1,7 +1,12 @@
 .footer {
   padding: 2rem 0 2.4rem;
   border-top: 1px solid rgba(142, 121, 201, 0.22);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(142, 121, 201, 0.12) 100%);
+  background: linear-gradient(
+    120deg,
+    rgba(243, 166, 204, 0.16) 0%,
+    rgba(179, 157, 219, 0.14) 45%,
+    rgba(159, 217, 255, 0.16) 100%
+  );
 }
 
 .footer p {

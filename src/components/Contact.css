@@ -1,5 +1,8 @@
 .contact {
   padding: 5.2rem 0;
+  background:
+    radial-gradient(circle at 12% 85%, rgba(169, 236, 205, 0.18), transparent 30%),
+    radial-gradient(circle at 88% 15%, rgba(243, 166, 204, 0.16), transparent 32%);
 }
 
 .contact .container {
@@ -21,13 +24,25 @@
 }
 
 .contact-item {
-  background: var(--surface);
-  border: 1px solid rgba(20, 20, 20, 0.1);
+  background: linear-gradient(145deg, #ffffff, #f8f4ff);
+  border: 1px solid rgba(179, 157, 219, 0.28);
   border-radius: 18px;
   padding: 1.8rem;
   text-align: left;
   box-shadow: var(--shadow-soft);
   transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.contact-item:nth-child(3n + 1) {
+  border-top: 3px solid #f3a6cc;
+}
+
+.contact-item:nth-child(3n + 2) {
+  border-top: 3px solid #9fd9ff;
+}
+
+.contact-item:nth-child(3n) {
+  border-top: 3px solid #a9eccd;
 }
 
 .contact-item:hover {

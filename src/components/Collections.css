@@ -1,5 +1,8 @@
 .collections {
   padding: 5.5rem 0;
+  background:
+    radial-gradient(circle at 8% 10%, rgba(159, 217, 255, 0.18), transparent 32%),
+    radial-gradient(circle at 92% 6%, rgba(243, 166, 204, 0.18), transparent 30%);
 }
 
 .collections h2 {
@@ -29,7 +32,7 @@
 
 .collection-card {
   background: var(--surface);
-  border: 1px solid rgba(20, 20, 20, 0.1);
+  border: 1px solid rgba(179, 157, 219, 0.34);
   border-radius: 18px;
   overflow: hidden;
   box-shadow: var(--shadow-soft);
@@ -54,12 +57,12 @@
 }
 
 .badge.new {
-  background: var(--accent-dark);
-  color: #fff;
+  background: linear-gradient(135deg, #86dcb2, #6cc7a0);
+  color: #15392a;
 }
 
 .badge.out-of-stock {
-  background: #bf2d2d;
+  background: linear-gradient(135deg, #ff9ea9, #ff7f90);
   color: #fff;
 }
 
@@ -76,7 +79,7 @@
   width: 100%;
   height: 390px;
   object-fit: contain;
-  background: linear-gradient(180deg, #ffffff 0%, #efe8ff 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #f1e9ff 52%, #e8f4ff 100%);
   flex-shrink: 0;
 }
 
@@ -101,7 +104,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(16, 16, 16, 0.88);
+  background: linear-gradient(160deg, rgba(58, 38, 110, 0.92), rgba(56, 82, 128, 0.86));
   backdrop-filter: blur(1px);
   color: #fff;
   padding: 1.8rem;
@@ -158,24 +161,24 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   text-decoration: none;
-  color: var(--accent-dark);
-  background: rgba(179, 157, 219, 0.24);
+  color: #392865;
+  background: linear-gradient(135deg, rgba(243, 166, 204, 0.42), rgba(159, 217, 255, 0.42));
   transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .product-link:hover {
-  background: rgba(179, 157, 219, 0.34);
+  background: linear-gradient(135deg, rgba(243, 166, 204, 0.54), rgba(159, 217, 255, 0.54));
   transform: translateY(-1px);
 }
 
 .overlay-link {
   margin-top: 0.9rem;
-  color: #1c1235;
-  background: #f0e8ff;
+  color: #30204f;
+  background: linear-gradient(135deg, #fbe7f2, #e8f6ff);
 }
 
 .overlay-link:hover {
-  background: #e8dcff;
+  background: linear-gradient(135deg, #f7dbea, #dff1ff);
 }
 
 .stock-status {

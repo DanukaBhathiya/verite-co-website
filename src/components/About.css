@@ -5,8 +5,8 @@
 .about .container {
   max-width: 860px;
   text-align: center;
-  background: var(--surface);
-  border: 1px solid rgba(20, 20, 20, 0.08);
+  background: linear-gradient(145deg, #ffffff, #f6f1ff 62%, #eef9ff);
+  border: 1px solid rgba(179, 157, 219, 0.3);
   border-radius: 22px;
   padding: 3rem 2rem;
   box-shadow: var(--shadow-soft);

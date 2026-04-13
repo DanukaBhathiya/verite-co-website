@@ -3,7 +3,7 @@
   top: 0;
   z-index: 120;
   backdrop-filter: blur(10px);
-  background: rgba(255, 255, 255, 0.92);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.95), rgba(247, 242, 255, 0.95));
   border-bottom: 1px solid rgba(142, 121, 201, 0.22);
 }
 
@@ -26,8 +26,8 @@
   height: 2.8rem;
   border-radius: 12px;
   overflow: hidden;
-  background: #fff;
-  border: 1px solid rgba(142, 121, 201, 0.28);
+  background: linear-gradient(135deg, rgba(243, 166, 204, 0.28), rgba(159, 217, 255, 0.28));
+  border: 1px solid rgba(179, 157, 219, 0.42);
   box-shadow: var(--shadow-soft);
 }
 
@@ -65,7 +65,7 @@
   gap: 0.5rem;
   padding: 0.35rem;
   border-radius: 999px;
-  background: rgba(142, 121, 201, 0.1);
+  background: linear-gradient(90deg, rgba(243, 166, 204, 0.16), rgba(159, 217, 255, 0.16));
 }
 
 .nav-links a {
@@ -79,7 +79,7 @@
 }
 
 .nav-links a:hover {
-  background: rgba(179, 157, 219, 0.24);
+  background: linear-gradient(120deg, rgba(179, 157, 219, 0.38), rgba(169, 236, 205, 0.38));
   color: var(--accent-dark);
   transform: translateY(-1px);
 }
