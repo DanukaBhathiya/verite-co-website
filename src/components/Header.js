@@ -17,6 +17,7 @@ function Header() {
         <nav className="nav-links">
           <a href="#home">Home</a>
           <a href="#collections">Collections</a>
+          <a href="#reviews">Reviews</a>
           <a href="#about">About</a>
           <a href="#contact">Contact</a>
         </nav>

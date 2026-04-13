@@ -2,6 +2,7 @@ import React from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Collections from './components/Collections';
+import Reviews from './components/Reviews';
 import About from './components/About';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
@@ -179,6 +180,7 @@ function App() {
         <>
           <Hero />
           <Collections />
+          <Reviews />
           <About />
           <Contact />
           <Footer />

@@ -64,6 +64,20 @@ create table if not exists public.products (
 );
 ```
 
+### 2.1 SQL: Create `shop_reviews` table
+
+Run in Supabase SQL editor:
+
+```sql
+create table if not exists public.shop_reviews (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  rating int not null check (rating between 1 and 5),
+  comment text not null,
+  created_at timestamptz not null default now()
+);
+```
+
 ### 3. Storage bucket for product images
 
 Create bucket in Supabase Storage:
@@ -87,6 +101,20 @@ create policy "public_write_products"
 on public.products
 for all
 using (true)
+with check (true);
+```
+
+```sql
+alter table public.shop_reviews enable row level security;
+
+create policy "public_read_reviews"
+on public.shop_reviews
+for select
+using (true);
+
+create policy "public_write_reviews"
+on public.shop_reviews
+for insert
 with check (true);
 ```
 
